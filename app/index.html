@@ -6,11 +6,10 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/photon.min.css">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/magnify.css">
 
     <!-- Javascript -->
-    <script src="js/menu.js" charset="utf-8"></script>
-    <script src="js/require.js"></script>
+    <script src="../js/menu.js" charset="utf-8"></script>
+    <script src="../js/require.js"></script>
 </head>
 <body>
     <div class="window">
@@ -89,6 +88,7 @@
             shLocalStorage = new LocalStorage('./StoryHub');
             $.get("https://api.github.com/user?access_token=" + shLocalStorage.getItem('githubtoken')).done(function(data) {
                 $('.toolbar-actions').append("<div class='btn btn-default pull-right'><span class='icon icon-github'></span> &nbsp; Welcome back, " + data.name + "!</div>");
+                $('.toolbar-actions').append('<div class="btn-group"><button class="btn btn-default" onclick="location.reload();"><span class="icon icon-download"></span> &nbsp; Refresh</button>');
                 $('.toolbar-actions').append('<div class="btn-group"><button class="btn btn-default" onclick="createStory();"><span class="icon icon-book-open"></span> &nbsp; Create Story</button>');
                 $('.toolbar-actions').append('<div class="btn-group"><button class="btn btn-default" onclick="addChapter();"><span class="icon icon-list-add"></span> &nbsp; Add Chapter</button>');
                 $('.toolbar-actions').append('<div class="btn-group"><button class="btn btn-default" onclick="editChapter();"><span class="icon icon-pencil"></span> &nbsp; Edit Chapter</button>');

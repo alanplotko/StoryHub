@@ -1,0 +1,22 @@
+{
+  "name": "storyhub-dev",
+  "productName": "StoryHub Dev",
+  "identifier": "com.alanplotko.storyhub",
+  "version": "0.1.5",
+  "description": "A GitHub-connected writing app",
+  "main": "background.js",
+  "config": {
+    "target": "development"
+  },
+  "author": "Alan Plotko <me@alanplotko.com>",
+  "scripts": {
+    "start": "electron .",
+    "release": "gulp release --env=production"
+  },
+  "dependencies": {
+    "fs-jetpack": "^0.7.0",
+    "jquery": "^2.1.4",
+    "node-localstorage": "^0.6.0",
+    "superagent": "^1.4.0"
+  }
+}
