@@ -17,7 +17,7 @@
 
         <!-- .toolbar-header sits at the top of your app -->
         <header class="toolbar toolbar-header">
-            <h1 class="title">StoryHub</h1>
+            <h1 class="title"><img src="../img/header_logo.png" /></h1>
             <div class="toolbar-actions">
             </div>
         </header>
@@ -47,6 +47,11 @@
                 </div>
             </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="toolbar toolbar-footer">
+            <h1 class="title">~ Made with <span class="icon icon-heart"></span> at HackRPI ~</h1>
+        </footer>
     </div>
 
     <script>
@@ -69,7 +74,7 @@
                 type: "POST",
                 url: "https://api.github.com/user/repos?access_token=" + shLocalStorage.getItem('githubtoken'),
                 data: JSON.stringify({
-                    "name": $('form#createStory input[name="storyName"]').val().trim().replace(/ /g,"-").replace(/'/g, '') + "-StoryHub",
+                    "name": $('form#createStory input[name="storyName"]').val().trim() + " StoryHub",
                     "description": $('form#createStory input[name="storyDescription"]').val().trim()
                 }),
                 success: function(data) {
@@ -86,6 +91,7 @@
                 $('.toolbar-actions').append("<div class='btn btn-default pull-right'><span class='icon icon-github'></span> &nbsp; Welcome back, " + data.name + "!</div>");
                 $('.toolbar-actions').append('<div class="btn-group"><button class="btn btn-default" onclick="createStory();"><span class="icon icon-book-open"></span> &nbsp; Create Story</button>');
                 $('.toolbar-actions').append('<div class="btn-group"><button class="btn btn-default" onclick="addChapter();"><span class="icon icon-list-add"></span> &nbsp; Add Chapter</button>');
+                $('.toolbar-actions').append('<div class="btn-group"><button class="btn btn-default" onclick="editChapter();"><span class="icon icon-pencil"></span> &nbsp; Edit Chapter</button>');
             }).fail(function() {
                 $('.toolbar-actions').append('<button class="btn btn-default" onclick="gitHubAuth()"><span class="icon icon-github"></span> &nbsp; Login with GitHub</button>');
                 $(".nav-group").append('<span class="nav-group-item">Login to see your stories.</span>');
@@ -95,7 +101,7 @@
                 for (var i = 0; i < data.length; i++) {
                     if (data[i].name.search("-StoryHub") != -1)
                     {
-                        $(".nav-group").append('<span class="nav-group-item" onclick="markActive($(this));"><span class="icon icon-book"></span>' + data[i].name.replace(/-/g," ").replace(/StoryHub/g, "") + '</span>');
+                        $(".nav-group").append('<span class="nav-group-item" onclick="markActive($(this), 0);"><span class="icon icon-book"></span>' + data[i].name.replace(/-/g," ").replace(/StoryHub/g, "") + '</span>');
                         count++;
                     }
                 }                
@@ -116,21 +122,26 @@
             });
         }   
 
-        function markActive(data) {
-            if (!data.hasClass('active')) {
+        function markActive(data, objectType) {
+            // objectType = 0 -> Story Names
+            if (objectType == 0 && !data.hasClass('active')) {
                 $('.nav-group span').removeClass('active');
                 data.addClass('active');
                 loadFiles(data);
             }
+            // objectType = 1 -> Chapter Names
+            else if (objectType == 1 && !data.hasClass('active')) {
+                $('tbody#repo-content td').removeClass('active');
+                data.addClass('active');
+            }
         }
 
         function loadFiles(data) {
-            console.log(data);
             $.get("https://api.github.com/repos/alanplotko/" + data.text().trim().replace(/ /g, '-') + "-StoryHub/contents?access_token=" + shLocalStorage.getItem('githubtoken')).done(function(data) {
                     $("#repo-content").fadeOut('', function() {
                         $("#repo-content").html('');
                         for (var i = 0; i < data.length; i++) {
-                            $("#repo-content").append("<tr><td>" + data[i].name + "</td></tr>");
+                            $("#repo-content").append("<tr><td onclick='markActive($(this), 1);'>" + data[i].name.replace(/.md/g, "") + "</td></tr>");
                         }
                         $("#repo-content").fadeIn();
                     });
@@ -145,7 +156,6 @@
                 }
             });
         }
-
         
         function addChapter() {
             if ($('.nav-group span').hasClass('active'))
@@ -157,12 +167,12 @@
             }
             else
             {
-                alert("Please elect a story from the left for which to add a chapter.");
+                alert("Please select a story from the left for which to add a chapter.");
             }
         }
 
         function submitChapter() {
-            var path = $('form#addChapter input[name="chapterName"]').val().trim().replace(/ /g,"-").replace(/'/g, '') + ".md";
+            var path = $('form#addChapter input[name="chapterName"]').val().trim() + ".md";
             $.ajax({
                 type: "PUT",
                 url: "https://api.github.com/repos/alanplotko/" + $('.nav-group span.active').text().trim().replace(/ /g, "-") + "-StoryHub" + "/contents/" + path + "?access_token=" + shLocalStorage.getItem('githubtoken'),
@@ -175,6 +185,46 @@
                     alert("Successfully created chapter: '" + $('form#addChapter input[name="chapterName"]').val().trim() + "'");
                     location.reload();
                 }
+            });
+        }
+
+        function editChapter() {
+            if ($('.nav-group span').hasClass('active'))
+            {  
+                $.get("https://api.github.com/repos/alanplotko/" + $('.nav-group span.active').text().trim().replace(/ /g, '-') + "-StoryHub/contents/" + $('tbody#repo-content td.active')[0].innerText.trim() + ".md?access_token=" + shLocalStorage.getItem('githubtoken')).done(function(res) {
+                        $('.pane.content').fadeOut('', function() {
+                            $('.pane.content').html('<form id="editChapter" action="javascript:void(0);"><div class="form-group"><label>Chapter Name</label><input type="text" name="chapterName" class="form-control" value="' + res.name.replace(/.md/g, "") + '" disabled></div><div class="form-group"><label>Save Message</label><textarea name="commitMessage" form="addChapter" class="form-control" placeholder="I changed the following..." rows="4"></textarea></div><div class="form-group"><label>Chapter Text</label><textarea name="chapterText" form="editChapter" class="form-control" placeholder="Chapter text..." rows="10">' + new Buffer(res.content, 'base64').toString("ascii") + '</textarea><input type="hidden" name="sha" value="' + res.sha + '"></div><div class="form-actions"><button class="btn btn-form btn-primary" onclick="submitEditedChapter();">Edit Chapter</button><button class="btn btn-form btn-default" onclick="location.reload();">Cancel</button></div></form>');
+                                $('.pane.content').fadeIn();
+                        });
+                }).fail(function(res) {
+                    if (res.responseJSON.message == "Not Found")
+                    {
+                        alert("Error fetching chapter. You may be experiencing Internet connectivity issues. Please try again later.");
+                    }
+                });
+            }
+            else
+            {
+                alert("Please select a chapter from the right for which chapter to edit.");
+            }
+        }
+
+        function submitEditedChapter() {
+            var path = $('form#editChapter input[name="chapterName"]').val() + ".md";
+            $.ajax({
+                type: "PUT",
+                url: "https://api.github.com/repos/alanplotko/" + $('.nav-group span.active').text().trim().replace(/ /g, "-") + "-StoryHub" + "/contents/" + path + "?access_token=" + shLocalStorage.getItem('githubtoken'),
+                data: JSON.stringify({
+                    "path": path,
+                    "message": $('form#editChapter textarea[name="commitMessage"]').val().trim(),
+                    "sha": $('form#editChapter input[name="sha"]').val().trim(),
+                    "content": new Buffer($('form#editChapter textarea[name="chapterText"]').val().trim()).toString('base64')
+                }),
+                success: function(data) {
+                    alert("Successfully edited chapter: '" + $('form#editChapter input[name="chapterName"]').val().trim() + "'");
+                    location.reload();
+                },
+                complete: function(data) { console.log(data); }
             });
         }
     </script>

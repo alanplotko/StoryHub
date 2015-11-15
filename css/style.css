@@ -12,3 +12,12 @@
 .pane.content form {
     padding: 10px 20px;
 }
+
+h1.title img {
+    padding: 10px 0 0 0;
+}
+
+tbody#repo-content td.active,
+input:disabled {
+    background-color: #dcdfe1;
+}
