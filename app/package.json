@@ -1,0 +1,16 @@
+{
+  "name": "storyhub",
+  "version": "0.1.0",
+  "description": "A GitHub-connected writing app",
+  "main": "app.js",
+  "author": "Alan Plotko",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron-prebuilt": "^0.34.3",
+    "jquery": "^2.1.4",
+    "node-localstorage": "^0.6.0",
+    "superagent": "^1.4.0"
+  }
+}

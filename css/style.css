@@ -1,0 +1,14 @@
+#data {
+    display: none;
+}
+
+#loading {
+    margin: 0 auto;
+    text-align: center;
+    display: block;
+}
+
+.pane.content p,
+.pane.content form {
+    padding: 10px 20px;
+}
